@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: event-pod-secientific-image
+  name: event-pod-cuda13
   labels:
     app: eventssl
 spec:
@@ -16,7 +16,7 @@ spec:
             - NVIDIA-GeForce-RTX-3090
   containers:
   - name: container
-    image: quay.io/jupyter/pytorch-notebook:cuda12-python-3.11.8
+    image: pytorch/pytorch:2.9.0-cuda13.0-cudnn9-devel
     command: ["/bin/bash", "-c", "sleep infinity"]
     resources:
       limits:
