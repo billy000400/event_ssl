@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: event-pod-sparse
+  labels:
+    app: eventssl
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: nvidia.com/gpu.product
+            operator: In
+            values:
+            - NVIDIA-GeForce-RTX-3090
+  containers:
+  - name: container
+    image: gitlab-registry.nrp-nautilus.io/billy000400/particlemind:latest
+    command: ["/bin/bash", "-c", "sleep infinity"]
+    resources:
+      limits:
+        memory: 32Gi
+        cpu: "4"
+        nvidia.com/gpu: 1
+      requests:
+        memory: 30Gi
+        cpu: "4"
+        nvidia.com/gpu: 1
+    volumeMounts:
+    - mountPath: /eventssl-vol
+      name: eventssl-vol
+  volumes:
+    - name: eventssl-vol
+      persistentVolumeClaim:
+        claimName: eventssl-vol 
