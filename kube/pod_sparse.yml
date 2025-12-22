@@ -30,7 +30,14 @@ spec:
     volumeMounts:
     - mountPath: /eventssl-vol
       name: eventssl-vol
+    - mountPath: /root/.ssh
+      name: git-ssh
+      readOnly: true
   volumes:
     - name: eventssl-vol
       persistentVolumeClaim:
         claimName: eventssl-vol 
+    - name: git-ssh
+      secret:
+        secretName: git-ssh
+        defaultMode: 0400
