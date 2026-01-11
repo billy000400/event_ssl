@@ -2,11 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   labels:
-    jobgroup: hhh-job-train
-  name: hhh-job-mass-aware-train-more
+    jobgroup: transformer-train
+  name: optimizer-transformer-train-10mm-updated-loss
 spec:
   backoffLimit: 0
-  parallelism: 2
+  parallelism: 1
   template:
     spec:
       initContainers:
@@ -16,8 +16,8 @@ spec:
         - "/bin/sh"
         - "-c"
         - >
-          git clone --single-branch --branch master --recurse-submodules https://github.com/Alexanders101/SPANet /opt/repo/hhh &&
-          chown -R 1000:1000 /opt/repo/hhh
+          git clone --single-branch --branch master --recurse-submodules https://github.com/billy000400/spvnas.git /opt/repo/spvnas &&
+          chown -R 1000:1000 /opt/repo/spvnas
         volumeMounts:
         - name: git-repo
           mountPath: /opt/repo
@@ -30,14 +30,13 @@ spec:
             memory: 1Gi
       containers:
       - name: training
-        image: gitlab-registry.nrp-nautilus.io/jmduarte/hhh:latest 
+        image: gitlab-registry.nrp-nautilus.io/billy000400/particlemind:latest 
         command:
         - "/bin/bash"
         - "-c"
         - >
-          cd /opt/repo/hhh &&
-          pip install -e . &&
-          python -m spanet.train -of /maad-vol/option_files/assign_resolved_hhh_regress_mass.json -l /maad-vol/logs -n assign_resolved_hhh_regress_mass  --epochs 500 --gpus 1 --batch_size 4096
+          cd /eventssl-vol/spvnas/ &&
+          python train_transformer.py --config /eventssl-vol/spvnas/configs/cld_hits/10mm_transformer_optimized.yaml --output_dir /eventssl-vol/spvnas/experiments/10mm_optimizer_transformer_30_epoch
         resources:
           limits:
             memory: 32Gi
@@ -48,22 +47,16 @@ spec:
             cpu: "4"
             nvidia.com/gpu: "1"
         volumeMounts:
-        - name: dshm
-          mountPath: /dev/shm
-        - mountPath: /maad-vol
-          name: maad-vol
         - name: git-repo
           mountPath: /opt/repo
+        - mountPath: /eventssl-vol
+          name: eventssl-vol
       volumes:
-      - name: dshm
-        emptyDir:
-          medium: Memory
-          sizeLimit: 8Gi
-      - name: maad-vol
-        persistentVolumeClaim:
-          claimName: maad-vol
-      - name: git-repo
-        emptyDir: {}
+        - name: eventssl-vol
+          persistentVolumeClaim:
+            claimName: eventssl-vol 
+        - name: git-repo
+          emptyDir: {}
       restartPolicy: Never
       affinity:
         nodeAffinity:
