@@ -3,7 +3,7 @@ kind: Job
 metadata:
   labels:
     jobgroup: transformer-train
-  name: ptv3-instance-10mm-train
+  name: transformer-miminal-train-10mm-point-eta-phi
 spec:
   backoffLimit: 0
   parallelism: 1
@@ -30,28 +30,34 @@ spec:
             memory: 1Gi
       containers:
       - name: training
-        image: gitlab-registry.nrp-nautilus.io/billy000400/pointtransformerv3:latest
+        image: gitlab-registry.nrp-nautilus.io/billy000400/particlemind:latest 
         command:
         - "/bin/bash"
         - "-c"
         - >
-          cd /eventssl-vol/PointTransformerV3 &&
-          python train_instance.py --config configs/config_5mm_rpe.yaml
+          cd /eventssl-vol/spvnas/ &&
+          python train_transformer.py --config /eventssl-vol/spvnas/configs/cld_hits/10mm_transformer_minimal.yaml --output_dir /eventssl-vol/spvnas/experiments/10mm_point_transformer_minimal_30_epoch
         resources:
           limits:
             memory: 32Gi
-            cpu: "4"
+            cpu: "8"
             nvidia.com/gpu: "1"
           requests:
             memory: 32Gi
-            cpu: "4"
+            cpu: "8"
             nvidia.com/gpu: "1"
         volumeMounts:
+        - name: dshm
+          mountPath: /dev/shm
         - name: git-repo
           mountPath: /opt/repo
         - mountPath: /eventssl-vol
           name: eventssl-vol
       volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 8Gi
         - name: eventssl-vol
           persistentVolumeClaim:
             claimName: eventssl-vol 
